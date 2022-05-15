@@ -9,12 +9,12 @@ namespace QuadTreeDemo
 {
     public class Point
     {
-        public int X = 0;
-        public int Y = 0;
+        public float X = 0;
+        public float Y = 0;
 
         public Point() { }
 
-        public Point(int x, int y)
+        public Point(float x, float y)
         {
             X = x;
             Y = y;

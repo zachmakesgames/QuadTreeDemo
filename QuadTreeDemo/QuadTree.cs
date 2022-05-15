@@ -18,13 +18,15 @@ namespace QuadTreeDemo
             root = new QNodeSpine(topLeft, bottomRight, center);
         }
 
-        public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, Point center, int quadrant)
+        public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, Point center_point, int quadrant)
         {
-            int new_half_extent_x = (extentBottomRight.X - extentTopLeft.X) / 4;
-            int new_half_extent_y = (extentBottomRight.Y - extentTopLeft.Y) / 4;
+            float new_half_extent_x = Math.Abs(extentBottomRight.X - extentTopLeft.X) / 2;
+            float new_half_extent_y = Math.Abs(extentBottomRight.Y - extentTopLeft.Y) / 2;
 
             Point topLeft = new Point();
             Point bottomRight = new Point();
+
+            Point center = Point.Center(extentTopLeft, extentBottomRight);
 
             switch (quadrant)
             {
@@ -43,24 +45,26 @@ namespace QuadTreeDemo
                 case 2:
                     {
                         topLeft = new Point(center);
-                        bottomRight = new Point(center + new Point(new_half_extent_x, new_half_extent_y));
+                        bottomRight = new Point(center + new Point(new_half_extent_x, -1*new_half_extent_y));
                     }
                     break;
                 case 3:
                     {
                         topLeft = new Point(center - new Point(new_half_extent_x, 0));
-                        bottomRight = new Point(center + new Point(0, new_half_extent_y));
+                        bottomRight = new Point(center - new Point(0, new_half_extent_y));
                     }
                     break;
             }
 
             Point newCenter = Point.Center(topLeft, bottomRight);
 
+            if(topLeft.Y - bottomRight.Y < 0 ||
+                bottomRight.X - topLeft.X < 0)
+            {
+                throw new Exception("Invalid area!");
+            }
+
             Quad subQuad = new Quad();
-            topLeft.X--;
-            topLeft.Y++;
-            bottomRight.X++;
-            bottomRight.Y--;
             subQuad.topLeft = topLeft;
             subQuad.bottomRight = bottomRight;
             subQuad.center = newCenter;
@@ -72,10 +76,15 @@ namespace QuadTreeDemo
         {
             int quadrant = -1;
 
+            float low_x = topLeft.X;
+            float high_x = bottomRight.X;
+            float low_y = bottomRight.Y;
+            float high_y = topLeft.Y;
+
             //Make sure the point lies in the quadrant.
             //May need to tweek this to include points that lie on the edge
-            if ((p.X <= bottomRight.X) && (p.X >= topLeft.X) &&
-                (p.Y <= topLeft.Y) && (p.Y >= bottomRight.Y))
+            if ((p.X >= low_x) && (p.X <= high_x) &&
+                (p.Y >= low_y) && (p.Y <= high_y))
             {
                 Point center = Point.Center(topLeft, bottomRight);
 
@@ -107,71 +116,6 @@ namespace QuadTreeDemo
             return quadrant;
         }
 
-        //private void BreakLeaf(ref QNodeBase leafNode, ref QNodeBase parentNode, int quadrant)
-        //{
-        //    if (leafNode != null && parentNode != null)
-        //    {
-        //        QNodeLeaf leaf = leafNode as QNodeLeaf;
-
-        //        //Copy the leaf's data so it doesnt go away when the node gets deleted
-        //        Point p = new Point(leaf.Position);
-        //        List<object> items = new List<object>(leaf.Items);
-
-        //        QNodeSpine parent = parentNode as QNodeSpine;
-
-        //        //Dividing by 4 gives us the half extent which is more usful than the full extent
-        //        //so we can calculate the corners
-        //        int new_half_extent_x = (parent.ExtentBottomRight.X - parent.ExtentTopLeft.X) / 4;
-        //        int new_half_extent_y = (parent.ExtentBottomRight.Y - parent.ExtentTopLeft.Y) / 4;
-
-        //        Point topLeft = new Point();
-        //        Point bottomRight = new Point();
-
-        //        switch (quadrant)
-        //        {
-        //            case 0:
-        //                {
-        //                    topLeft = new Point(parent.ExtentTopLeft);
-        //                    bottomRight = new Point(parent.Position);
-        //                }
-        //                break;
-        //            case 1:
-        //                {
-        //                    topLeft = new Point(parent.Position + new Point(0, new_half_extent_y));
-        //                    bottomRight = new Point(parent.Position + new Point(new_half_extent_x, 0));
-        //                }
-        //                break;
-        //            case 2:
-        //                {
-        //                    topLeft = new Point(parent.Position);
-        //                    bottomRight = new Point(parent.Position + new Point(new_half_extent_x, new_half_extent_y));
-        //                }
-        //                break;
-        //            case 3:
-        //                {
-        //                    topLeft = new Point(parent.Position - new Point(new_half_extent_x, 0));
-        //                    bottomRight = new Point(parent.Position + new Point(0, new_half_extent_y));
-        //                }
-        //                break;
-        //        }
-
-        //        Point newCenter = Point.Center(topLeft, bottomRight);
-
-        //        leafNode = new QNodeSpine(topLeft, bottomRight, newCenter);
-
-        //        //Add a new leaf node to the now spine node
-        //        int quad = GetQuadrant(p, topLeft, bottomRight);
-
-        //        if (quad == -1)
-        //        {
-        //            throw new Exception("Node is outside of its own extent, what the fuck?!");
-        //        }
-
-
-        //        ((QNodeSpine)leafNode).Children[quad] = new QNodeLeaf(p, items);
-        //    }
-        //}
-
         private void AddPointToNode(ref QNodeBase node, Point p, object data)
         {
             if (node == null)
@@ -179,15 +123,7 @@ namespace QuadTreeDemo
                 return;
             }
 
-            //Shouldn't need this, it will be easier to do a forward search at a spine and create
-            //a new spine from an old spine instead of a new spine from a leaf
-            //if(node.GetType() == typeof(QNodeLeaf))
-            //{
-            //    //need to break the leaf into a spine and subdivide
-            //    //BreakLeaf(node, parent, )
-            //}
-            //else{
-            //Determine which quadrant it should go in
+            
 
 
             QNodeSpine spine = node as QNodeSpine;
@@ -197,7 +133,7 @@ namespace QuadTreeDemo
             if(quadrant < 0)
             {
                 Trace.WriteLine("Point at X: " + p.X.ToString() + " Y: " + p.Y.ToString() + " falls out of its quadrant!");
-                return;///TODO: Figure out how to handle nodes that lie on the edge of a quadrant
+                return;
             }
 
             if (spine.Children[quadrant] == null)
@@ -276,10 +212,7 @@ namespace QuadTreeDemo
                     DrawNode(ref bitmap, ref spine.Children[2]);
                     DrawNode(ref bitmap, ref spine.Children[3]);
                 }
-                else
-                {
-                    g.FillEllipse(Brushes.Red, node.Position.X+center_x, -1*node.Position.Y+center_y, 6, 6);
-                }
+                
             }
         }
     }
