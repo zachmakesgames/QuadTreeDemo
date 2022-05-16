@@ -215,5 +215,50 @@ namespace QuadTreeDemo
                 
             }
         }
+    
+        private void CheckNodesInRadius(ref List<QNodeLeaf> nodes, ref QNodeBase current_node, Point p, float radius)
+        {
+            if(current_node.GetType() == typeof(QNodeSpine))
+            {
+                QNodeSpine spine = current_node as QNodeSpine;
+
+                Quad q = new Quad();
+                q.topLeft = spine.ExtentTopLeft;
+                q.bottomRight = spine.ExtentBottomRight;
+                q.center = spine.Position;
+
+                if(q.DoesCircleOverlap(p, radius))
+                {
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        QNodeBase child = spine.Children[i];
+                        if (child != null)
+                        {
+
+                            if (child.GetType() == typeof(QNodeLeaf))
+                            {
+                                nodes.Add(child as QNodeLeaf);
+                            }
+                            else
+                            {
+                                CheckNodesInRadius(ref nodes, ref child, p, radius);
+                            }
+                        }
+                    }
+                }
+
+
+                
+            }
+            
+        }
+
+        public List<QNodeLeaf> FindNodesInRadius(Point p, float radius)
+        {
+            List<QNodeLeaf> nodes = new List<QNodeLeaf>();
+            CheckNodesInRadius(ref nodes, ref root, p, radius);
+
+            return nodes;
+        }
     }
 }
