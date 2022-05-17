@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace QuadTreeDemo
 {
+
     public class Point
     {
         public float X = 0;
@@ -68,27 +69,30 @@ namespace QuadTreeDemo
 
         public bool DoesCircleOverlap(Point circ_center, float radius)
         {
+            float sqrDist = SqrDistance(circ_center);
+
+            return sqrDist <= radius * radius;
+        }
+
+        public float SqrDistance(Point p)
+        {
+
+            float sqrDist = 0.0f;
+
             float min_x = topLeft.X;
             float max_x = bottomRight.X;
             float min_y = bottomRight.Y;
             float max_y = topLeft.Y;
 
+            float vx = p.X;
+            if (vx < min_x) sqrDist += (min_x-vx) * (min_x-vx);
+            if (vx > max_x) sqrDist += (vx-max_x) * (vx-max_x);
 
-            Point bottomLeft = new Point(topLeft.X, bottomRight.Y);
-            Point topRight = new Point(bottomRight.X, topLeft.Y);
+            float vy = p.Y;
+            if(vy < min_y) sqrDist += (min_y - vy) * (min_y - vy);
+            if(vy > max_y) sqrDist += (vy - max_y) * (vy - max_y);
 
-            if(
-                (circ_center.X > min_x && circ_center.X < max_x && circ_center.Y > min_y && circ_center.Y < max_y) ||
-                Point.Distance(topLeft, circ_center) < radius ||
-                Point.Distance(bottomRight, circ_center) < radius ||
-                Point.Distance(bottomLeft, circ_center) < radius ||
-                Point.Distance(topRight, circ_center) < radius ||
-                Point.Distance(center, circ_center) < radius)
-            {
-                return true;
-            }
-
-            return false;
+            return sqrDist;
         }
 
     }

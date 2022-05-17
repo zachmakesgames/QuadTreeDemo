@@ -1,34 +1,60 @@
-﻿//QuadTree.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using System.Diagnostics;
 
 namespace QuadTreeDemo
 {
-    //A non pre-allocated quad tree that allocates new nodes as they are inserted.
-    //This implementation works for small quantities of objects, but causes stack
-    //overflows beyond roughly 200 objects (changes based on object distribution).
-    
-    //Making this implementation depth aware and only allocating nodes down to a certain
-    //depth will greatly alleviate the strain on the stack and should prevent stack overflows.
-    //As is PBQuadTree is more stable, but with some changes this implementation can be made
-    //better.
-    internal class QuadTree
+    //PBQuadTree or PreBuiltQuadTree preallocates nodes down to a specified max depth
+    //This makes inserting faster as we know we never have to allocate another node,
+    //we can use a while loop to insert nodes instead of using recursion.
+    internal class PBQuadTree
     {
         QNodeBase root;
 
-        public int maxDepth = 0;
+        int stackDepth = 0;
+        public int maxDepth = 4;
 
-        public QuadTree(Point topLeft, Point bottomRight, Point center)
+        public PBQuadTree(Point topLeft, Point bottomRight, Point center)
         {
             root = new QNodeSpine(topLeft, bottomRight, center);
+            BuildTree(ref root, 0);
         }
 
-        public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, Point center_point, int quadrant)
+        private void BuildTree(ref QNodeBase node, int depth)
+        {
+            Quad q0 = SubdivideQuad(node.ExtentTopLeft, node.ExtentBottomRight, 0);
+            Quad q1 = SubdivideQuad(node.ExtentTopLeft, node.ExtentBottomRight, 1);
+            Quad q2 = SubdivideQuad(node.ExtentTopLeft, node.ExtentBottomRight, 2);
+            Quad q3 = SubdivideQuad(node.ExtentTopLeft, node.ExtentBottomRight, 3);
+            
+            if (depth < maxDepth)
+            {
+
+                QNodeSpine s = node as QNodeSpine;
+
+                s.Children[0] = new QNodeSpine(q0);
+                s.Children[1] = new QNodeSpine(q1);
+                s.Children[2] = new QNodeSpine(q2);
+                s.Children[3] = new QNodeSpine(q3);
+
+                BuildTree(ref s.Children[0], depth + 1);
+                BuildTree(ref s.Children[1], depth + 1);
+                BuildTree(ref s.Children[2], depth + 1);
+                BuildTree(ref s.Children[3], depth + 1);
+            }
+            else
+            {
+                ((QNodeSpine)node).Children[0] = new QNodeLeaf(q0.center);
+                ((QNodeSpine)node).Children[1] = new QNodeLeaf(q1.center);
+                ((QNodeSpine)node).Children[2] = new QNodeLeaf(q2.center);
+                ((QNodeSpine)node).Children[3] = new QNodeLeaf(q3.center);
+            }
+        }
+
+        public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, int quadrant)
         {
             float new_half_extent_x = Math.Abs(extentBottomRight.X - extentTopLeft.X) / 2;
             float new_half_extent_y = Math.Abs(extentBottomRight.Y - extentTopLeft.Y) / 2;
@@ -55,7 +81,7 @@ namespace QuadTreeDemo
                 case 2:
                     {
                         topLeft = new Point(center);
-                        bottomRight = new Point(center + new Point(new_half_extent_x, -1*new_half_extent_y));
+                        bottomRight = new Point(center + new Point(new_half_extent_x, -1 * new_half_extent_y));
                     }
                     break;
                 case 3:
@@ -68,7 +94,7 @@ namespace QuadTreeDemo
 
             Point newCenter = Point.Center(topLeft, bottomRight);
 
-            if(topLeft.Y - bottomRight.Y < 0 ||
+            if (topLeft.Y - bottomRight.Y < 0 ||
                 bottomRight.X - topLeft.X < 0)
             {
                 throw new Exception("Invalid area!");
@@ -128,83 +154,62 @@ namespace QuadTreeDemo
 
         private void AddPointToNode(ref QNodeBase node, Point p, Object2D data)
         {
-            stackDepth++;
-
-            //Trace.WriteLine("Current tree depth: " + maxDepth.ToString());
-
-            if (node == null)
+            QNodeBase n = node;
+            while (true)
             {
-                return;
-            }
-
-            
-            QNodeSpine spine = node as QNodeSpine;
-
-            int quadrant = GetQuadrant(p, spine.ExtentTopLeft, spine.ExtentBottomRight);
-
-            if(quadrant < 0)
-            {
-                Trace.WriteLine("Point at X: " + p.X.ToString() + " Y: " + p.Y.ToString() + " falls out of its quadrant!");
-                return;
-            }
-
-            if (spine.Children[quadrant] == null)
-            {
-                //If the spine has an empty spot, just add the leaf
-                spine.Children[quadrant] = new QNodeLeaf(p, data);
-
-            }
-            else
-            {
-                if (spine.Children[quadrant] is QNodeSpine)
+                int quad = GetQuadrant(p, n.ExtentTopLeft, n.ExtentBottomRight);
+                if(quad > 0)
                 {
-                    AddPointToNode(ref spine.Children[quadrant], p, data);
+                    if(n.GetType() == typeof(QNodeSpine))
+                    {
+                        n = ((QNodeSpine)n).Children[quad];
+                    }
+                    else
+                    {
+                        //n is a leaf so add the data to the leaf
+                        ((QNodeLeaf)n).Items.Add(data);
+                    }
                 }
                 else
                 {
-                    //Otherwise get the leaf that is currently in the way,
-                    //then create a new spine and call AddPointToNode twice,
-                    //once for the old point (do this one first!) and then
-                    //again for the new point
-                    //also need to break the leaf into a spine and subdivide
-                    QNodeLeaf leaf = (QNodeLeaf)spine.Children[quadrant];
-
-                    Quad subQuad = SubdivideQuad(spine.ExtentTopLeft, spine.ExtentBottomRight, spine.Position, quadrant);
-
-
-                    //Calculate 
-                    int newDepth= spine.depth + 1;
-                    if(newDepth > maxDepth)
-                    {
-                        maxDepth = newDepth;
-                    }
-
-                    QNodeSpine newSpine = new QNodeSpine(subQuad.topLeft, subQuad.bottomRight, subQuad.center);
-                    newSpine.depth = newDepth;
-                    spine.Children[quadrant] = newSpine;
-
-                    AddPointToNode(ref spine.Children[quadrant], leaf.Position, leaf.Items[0]);
-                    AddPointToNode(ref spine.Children[quadrant], p, data);
+                    return;
                 }
             }
-            //}
         }
 
         public void AddPoint(Point p, Object2D data)
         {
-            stackDepth = 1;
-            //Trace.WriteLine("----ADD POINT----");
-            AddPointToNode(ref root, p, data);
-            //Trace.WriteLine("Stack depth after adding point: " + stackDepth.ToString());
-            //Trace.WriteLine("Current tree depth: " + maxDepth.ToString());
-            //Trace.WriteLine("====ADD POINT====");
+            ref QNodeBase n = ref root;
+            while (true)
+            {
+                if (n.GetType() == typeof(QNodeSpine))
+                {
+                    int quad = GetQuadrant(p, n.ExtentTopLeft, n.ExtentBottomRight);
+                    if (quad >= 0)
+                    {
+                        n = ref ((QNodeSpine)n).Children[quad];
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    //n is a leaf so add the data to the leaf
+                    QNodeLeaf leaf = n as QNodeLeaf;
+                    leaf.Items.Add(data);
+                    return;
+                }
+                
+            }
         }
 
         public Bitmap DrawTree()
         {
             int width = (int)(root.ExtentBottomRight.X - root.ExtentTopLeft.X);
             int height = (int)(root.ExtentTopLeft.Y - root.ExtentBottomRight.Y);
-            Bitmap bitmap = new Bitmap(width+10, height+10);
+            Bitmap bitmap = new Bitmap(width + 10, height + 10);
 
             Graphics g = Graphics.FromImage(bitmap);
             g.Clear(Color.LightGreen);
@@ -229,7 +234,7 @@ namespace QuadTreeDemo
                     int width = (int)(node.ExtentBottomRight.X - node.ExtentTopLeft.X);
                     int height = (int)(node.ExtentTopLeft.Y - node.ExtentBottomRight.Y);
 
-                    g.DrawRectangle(Pens.Black, node.ExtentTopLeft.X+center_x, -1*node.ExtentTopLeft.Y+center_y, width, height);
+                    g.DrawRectangle(Pens.Black, node.ExtentTopLeft.X + center_x, -1 * node.ExtentTopLeft.Y + center_y, width, height);
 
                     QNodeSpine spine = node as QNodeSpine;
                     DrawNode(ref bitmap, ref spine.Children[0]);
@@ -237,13 +242,13 @@ namespace QuadTreeDemo
                     DrawNode(ref bitmap, ref spine.Children[2]);
                     DrawNode(ref bitmap, ref spine.Children[3]);
                 }
-                
+
             }
         }
-    
+
         private void CheckNodesInRadius(ref List<QNodeLeaf> nodes, ref QNodeBase current_node, Point p, float radius)
         {
-            if(current_node.GetType() == typeof(QNodeSpine))
+            if (current_node.GetType() == typeof(QNodeSpine))
             {
                 QNodeSpine spine = current_node as QNodeSpine;
 
@@ -252,7 +257,7 @@ namespace QuadTreeDemo
                 q.bottomRight = spine.ExtentBottomRight;
                 q.center = spine.Position;
 
-                if(q.DoesCircleOverlap(p, radius))
+                if (q.DoesCircleOverlap(p, radius))
                 {
                     for (int i = 0; i < 4; ++i)
                     {
@@ -260,24 +265,24 @@ namespace QuadTreeDemo
 
                         //if (sub_quad.DoesCircleOverlap(p, radius))
                         //{
-                            QNodeBase child = spine.Children[i];
-                            if (child != null)
-                            {
+                        QNodeBase child = spine.Children[i];
+                        if (child != null)
+                        {
 
-                                if (child.GetType() == typeof(QNodeLeaf))
-                                {
-                                    nodes.Add(child as QNodeLeaf);
-                                }
-                                else
-                                {
-                                    CheckNodesInRadius(ref nodes, ref child, p, radius);
-                                }
+                            if (child.GetType() == typeof(QNodeLeaf))
+                            {
+                                nodes.Add(child as QNodeLeaf);
                             }
+                            else
+                            {
+                                CheckNodesInRadius(ref nodes, ref child, p, radius);
+                            }
+                        }
                         //}
                     }
-                }   
+                }
             }
-            
+
         }
 
         public List<QNodeLeaf> FindNodesInRadius(Point p, float radius)
