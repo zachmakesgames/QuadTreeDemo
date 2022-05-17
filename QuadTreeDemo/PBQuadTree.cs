@@ -16,8 +16,9 @@ namespace QuadTreeDemo
 
         public int maxDepth = 4;
 
-        public PBQuadTree(Point topLeft, Point bottomRight, Point center)
+        public PBQuadTree(Point topLeft, Point bottomRight, Point center, int max_depth = 4)
         {
+            maxDepth = max_depth;
             root = new QNodeSpine(topLeft, bottomRight, center);
             BuildTree(ref root, 0);
         }

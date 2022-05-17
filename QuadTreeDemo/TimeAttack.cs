@@ -41,7 +41,7 @@ namespace QuadTreeDemo
             Point tl = new Point(-treeWidth, treeWidth);
             Point br = new Point(treeWidth, -treeWidth);
 
-            PBQuadTree tree = new PBQuadTree(tl, br, new Point(0, 0));
+            PBQuadTree tree = new PBQuadTree(tl, br, new Point(0, 0), (int)depthBox.Value);
 
             foreach(Object2D obj in points)
             {

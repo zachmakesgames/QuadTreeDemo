@@ -41,10 +41,13 @@
             this.label6 = new System.Windows.Forms.Label();
             this.treeTimeLabel = new System.Windows.Forms.Label();
             this.noTreeTimeLabel = new System.Windows.Forms.Label();
+            this.depthBox = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nodeBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.treeWidthBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchRadiusBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.runCountBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.depthBox)).BeginInit();
             this.SuspendLayout();
             // 
             // nodeBox
@@ -111,7 +114,7 @@
             // 
             // searchRadiusBox
             // 
-            this.searchRadiusBox.Location = new System.Drawing.Point(12, 102);
+            this.searchRadiusBox.Location = new System.Drawing.Point(12, 144);
             this.searchRadiusBox.Maximum = new decimal(new int[] {
             1000000,
             0,
@@ -134,7 +137,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(258, 104);
+            this.label3.Location = new System.Drawing.Point(258, 146);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(162, 32);
             this.label3.TabIndex = 5;
@@ -142,7 +145,7 @@
             // 
             // runCountBox
             // 
-            this.runCountBox.Location = new System.Drawing.Point(12, 147);
+            this.runCountBox.Location = new System.Drawing.Point(12, 189);
             this.runCountBox.Maximum = new decimal(new int[] {
             1000000,
             0,
@@ -165,7 +168,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(258, 149);
+            this.label4.Location = new System.Drawing.Point(258, 191);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(124, 32);
             this.label4.TabIndex = 7;
@@ -173,7 +176,7 @@
             // 
             // timeAttackButton
             // 
-            this.timeAttackButton.Location = new System.Drawing.Point(12, 192);
+            this.timeAttackButton.Location = new System.Drawing.Point(12, 238);
             this.timeAttackButton.Name = "timeAttackButton";
             this.timeAttackButton.Size = new System.Drawing.Size(240, 46);
             this.timeAttackButton.TabIndex = 8;
@@ -184,7 +187,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 279);
+            this.label5.Location = new System.Drawing.Point(12, 325);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(321, 32);
             this.label5.TabIndex = 9;
@@ -193,7 +196,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 321);
+            this.label6.Location = new System.Drawing.Point(12, 367);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(357, 32);
             this.label6.TabIndex = 10;
@@ -202,7 +205,7 @@
             // treeTimeLabel
             // 
             this.treeTimeLabel.AutoSize = true;
-            this.treeTimeLabel.Location = new System.Drawing.Point(339, 279);
+            this.treeTimeLabel.Location = new System.Drawing.Point(339, 325);
             this.treeTimeLabel.Name = "treeTimeLabel";
             this.treeTimeLabel.Size = new System.Drawing.Size(27, 32);
             this.treeTimeLabel.TabIndex = 11;
@@ -211,17 +214,50 @@
             // noTreeTimeLabel
             // 
             this.noTreeTimeLabel.AutoSize = true;
-            this.noTreeTimeLabel.Location = new System.Drawing.Point(375, 321);
+            this.noTreeTimeLabel.Location = new System.Drawing.Point(375, 367);
             this.noTreeTimeLabel.Name = "noTreeTimeLabel";
             this.noTreeTimeLabel.Size = new System.Drawing.Size(27, 32);
             this.noTreeTimeLabel.TabIndex = 12;
             this.noTreeTimeLabel.Text = "0";
+            // 
+            // depthBox
+            // 
+            this.depthBox.Location = new System.Drawing.Point(12, 102);
+            this.depthBox.Maximum = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            this.depthBox.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.depthBox.Name = "depthBox";
+            this.depthBox.Size = new System.Drawing.Size(240, 39);
+            this.depthBox.TabIndex = 13;
+            this.depthBox.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(258, 104);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(129, 32);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "Tree depth";
             // 
             // TimeAttack
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(580, 441);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.depthBox);
             this.Controls.Add(this.noTreeTimeLabel);
             this.Controls.Add(this.treeTimeLabel);
             this.Controls.Add(this.label6);
@@ -241,6 +277,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.treeWidthBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchRadiusBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.runCountBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.depthBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -261,5 +298,7 @@
         private Label label6;
         private Label treeTimeLabel;
         private Label noTreeTimeLabel;
+        private NumericUpDown depthBox;
+        private Label label7;
     }
 }
