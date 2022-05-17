@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace QuadTreeDemo
 {
+    //Base node has position and extents
+    //Could be improved by simply using a Quad
+    //to contain all three
     internal class QNodeBase
     {
         public Point Position = new Point();
@@ -15,6 +18,8 @@ namespace QuadTreeDemo
         public Point ExtentBottomRight = new Point();
     }
 
+    //Spine is derived from base, but also has 4 children
+    //and a depth (depth in the tree)
     internal class QNodeSpine : QNodeBase
     {
         public QNodeBase[] Children = new QNodeBase[4]; //0 = TopLeft, 1 = TopRight, 2 = BottomRight, 3 = BottomLeft
@@ -43,6 +48,8 @@ namespace QuadTreeDemo
         }
     }
 
+    //Leaf is also derived from base, but has a
+    //list of objects contained within the leaf
     internal class QNodeLeaf : QNodeBase
     {
         public List<Object2D> Items = new List<Object2D>();

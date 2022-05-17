@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace QuadTreeDemo
 {
-
+    //A very basic 2D Point implementation
+    //with some useful operators and functions
     public class Point
     {
         public float X = 0;
@@ -61,12 +62,17 @@ namespace QuadTreeDemo
         }
     }
 
+
+    //A very basic 2D Quad implementation
+    //with some very helpful basic collision
+    //detection functions
     public class Quad
     {
         public Point topLeft = new Point();
         public Point bottomRight = new Point();
         public Point center = new Point();
 
+        //A function to determine if a circle overlaps this quad
         public bool DoesCircleOverlap(Point circ_center, float radius)
         {
             float sqrDist = SqrDistance(circ_center);
@@ -74,6 +80,8 @@ namespace QuadTreeDemo
             return sqrDist <= radius * radius;
         }
 
+        //A functoin to determine the squared distance from any point
+        //in this quad to the given point, needed for the above function
         public float SqrDistance(Point p)
         {
 

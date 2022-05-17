@@ -28,6 +28,7 @@ namespace QuadTreeDemo
             root = new QNodeSpine(topLeft, bottomRight, center);
         }
 
+        //A basic function to subdivide a given quad, returns the quad in the quadrant specificed by quadrant
         public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, Point center_point, int quadrant)
         {
             float new_half_extent_x = Math.Abs(extentBottomRight.X - extentTopLeft.X) / 2;
@@ -82,6 +83,8 @@ namespace QuadTreeDemo
             return subQuad;
         }
 
+        //Returns the quadrant number that point p falls in given a quad defined by topLeft and bottomRight
+        //Returns -1 if the point falls outside of the quad
         private static int GetQuadrant(Point p, Point topLeft, Point bottomRight)
         {
             int quadrant = -1;
@@ -126,9 +129,9 @@ namespace QuadTreeDemo
             return quadrant;
         }
 
+        //A recursive function to a point/object to a given node
         private void AddPointToNode(ref QNodeBase node, Point p, Object2D data)
         {
-            stackDepth++;
 
             //Trace.WriteLine("Current tree depth: " + maxDepth.ToString());
 
@@ -190,16 +193,14 @@ namespace QuadTreeDemo
             //}
         }
 
+        //The public method to add a point to the tree
+        //Recursively calls AddPointToNode on the root node
         public void AddPoint(Point p, Object2D data)
         {
-            stackDepth = 1;
-            //Trace.WriteLine("----ADD POINT----");
             AddPointToNode(ref root, p, data);
-            //Trace.WriteLine("Stack depth after adding point: " + stackDepth.ToString());
-            //Trace.WriteLine("Current tree depth: " + maxDepth.ToString());
-            //Trace.WriteLine("====ADD POINT====");
         }
 
+        //A function to draw the current tree to a bitmap
         public Bitmap DrawTree()
         {
             int width = (int)(root.ExtentBottomRight.X - root.ExtentTopLeft.X);
@@ -215,6 +216,7 @@ namespace QuadTreeDemo
             return bitmap;
         }
 
+        //A recursive function to draw a given node
         public void DrawNode(ref Bitmap bitmap, ref QNodeBase node)
         {
             if (node != null)
@@ -241,6 +243,9 @@ namespace QuadTreeDemo
             }
         }
     
+        //Recursively searches the tree to find all nodes that overlap the circle created
+        //by a center point p and radius.
+        //Uses Quad.DoesCircleOverlap to determine if the current node overlaps the circle
         private void CheckNodesInRadius(ref List<QNodeLeaf> nodes, ref QNodeBase current_node, Point p, float radius)
         {
             if(current_node.GetType() == typeof(QNodeSpine))
@@ -256,30 +261,26 @@ namespace QuadTreeDemo
                 {
                     for (int i = 0; i < 4; ++i)
                     {
-                        //Quad sub_quad = SubdivideQuad(spine.ExtentTopLeft, spine.ExtentBottomRight, spine.Position, i);
-
-                        //if (sub_quad.DoesCircleOverlap(p, radius))
-                        //{
-                            QNodeBase child = spine.Children[i];
-                            if (child != null)
+                        QNodeBase child = spine.Children[i];
+                        if (child != null)
+                        {
+                            if (child.GetType() == typeof(QNodeLeaf))
                             {
-
-                                if (child.GetType() == typeof(QNodeLeaf))
-                                {
-                                    nodes.Add(child as QNodeLeaf);
-                                }
-                                else
-                                {
-                                    CheckNodesInRadius(ref nodes, ref child, p, radius);
-                                }
+                                nodes.Add(child as QNodeLeaf);
                             }
-                        //}
+                            else
+                            {
+                                CheckNodesInRadius(ref nodes, ref child, p, radius);
+                            }
+                        }
                     }
                 }   
             }
-            
         }
 
+
+        //A public starter function to find all nodes that overlap a circle
+        //created by center point p and radius
         public List<QNodeLeaf> FindNodesInRadius(Point p, float radius)
         {
             List<QNodeLeaf> nodes = new List<QNodeLeaf>();

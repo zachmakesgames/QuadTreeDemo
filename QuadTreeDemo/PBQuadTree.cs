@@ -14,7 +14,6 @@ namespace QuadTreeDemo
     {
         QNodeBase root;
 
-        int stackDepth = 0;
         public int maxDepth = 4;
 
         public PBQuadTree(Point topLeft, Point bottomRight, Point center)
@@ -23,6 +22,7 @@ namespace QuadTreeDemo
             BuildTree(ref root, 0);
         }
 
+        //Pre-build the tree with empty leaf nodes
         private void BuildTree(ref QNodeBase node, int depth)
         {
             Quad q0 = SubdivideQuad(node.ExtentTopLeft, node.ExtentBottomRight, 0);
@@ -54,6 +54,7 @@ namespace QuadTreeDemo
             }
         }
 
+        //Same subdivision function as QuadTree
         public static Quad SubdivideQuad(Point extentTopLeft, Point extentBottomRight, int quadrant)
         {
             float new_half_extent_x = Math.Abs(extentBottomRight.X - extentTopLeft.X) / 2;
@@ -108,6 +109,7 @@ namespace QuadTreeDemo
             return subQuad;
         }
 
+        //Same quadrant function as QuadTree
         private static int GetQuadrant(Point p, Point topLeft, Point bottomRight)
         {
             int quadrant = -1;
@@ -152,31 +154,9 @@ namespace QuadTreeDemo
             return quadrant;
         }
 
-        private void AddPointToNode(ref QNodeBase node, Point p, Object2D data)
-        {
-            QNodeBase n = node;
-            while (true)
-            {
-                int quad = GetQuadrant(p, n.ExtentTopLeft, n.ExtentBottomRight);
-                if(quad > 0)
-                {
-                    if(n.GetType() == typeof(QNodeSpine))
-                    {
-                        n = ((QNodeSpine)n).Children[quad];
-                    }
-                    else
-                    {
-                        //n is a leaf so add the data to the leaf
-                        ((QNodeLeaf)n).Items.Add(data);
-                    }
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
-
+        //A linear method to add a point/object to the current tree.
+        //Since we should never have to re-allocate leaf nodes, we can
+        //easily navigate the tree in a linear method instead of recursively.
         public void AddPoint(Point p, Object2D data)
         {
             ref QNodeBase n = ref root;
@@ -205,6 +185,7 @@ namespace QuadTreeDemo
             }
         }
 
+        //A simple function to draw the current tree
         public Bitmap DrawTree()
         {
             int width = (int)(root.ExtentBottomRight.X - root.ExtentTopLeft.X);
@@ -220,6 +201,8 @@ namespace QuadTreeDemo
             return bitmap;
         }
 
+        //A simple function to draw the given node on
+        //the given bitmap
         public void DrawNode(ref Bitmap bitmap, ref QNodeBase node)
         {
             if (node != null)
@@ -246,6 +229,9 @@ namespace QuadTreeDemo
             }
         }
 
+
+        //A recursive function to find all leaf nodes that overlap the circle
+        //created by center point p and radius
         private void CheckNodesInRadius(ref List<QNodeLeaf> nodes, ref QNodeBase current_node, Point p, float radius)
         {
             if (current_node.GetType() == typeof(QNodeSpine))
@@ -261,10 +247,6 @@ namespace QuadTreeDemo
                 {
                     for (int i = 0; i < 4; ++i)
                     {
-                        //Quad sub_quad = SubdivideQuad(spine.ExtentTopLeft, spine.ExtentBottomRight, spine.Position, i);
-
-                        //if (sub_quad.DoesCircleOverlap(p, radius))
-                        //{
                         QNodeBase child = spine.Children[i];
                         if (child != null)
                         {
@@ -278,13 +260,15 @@ namespace QuadTreeDemo
                                 CheckNodesInRadius(ref nodes, ref child, p, radius);
                             }
                         }
-                        //}
                     }
                 }
             }
 
         }
 
+
+        //A public function to initiate the recursive finding of overlapping
+        //leaf nodes
         public List<QNodeLeaf> FindNodesInRadius(Point p, float radius)
         {
             List<QNodeLeaf> nodes = new List<QNodeLeaf>();
