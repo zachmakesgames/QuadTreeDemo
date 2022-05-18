@@ -85,9 +85,9 @@ namespace QuadTreeDemo
 
                 UpdateImage();
             }
-            }
+        }
 
-            private void igniteNeighbors_Click(object sender, EventArgs e)
+        private void igniteNeighbors_Click(object sender, EventArgs e)
         {
             int maxignitedTime = 1;
             
