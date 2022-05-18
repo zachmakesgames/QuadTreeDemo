@@ -34,6 +34,9 @@ the Draw Quads check box.
 At any point, a new simulation can be started by clicking on the Build Tree button
 again. This will generate a new tree and reset the simulation.
 
+The forest fire demo populates a tree that is 1000 units wide and tall with 10,000
+trees.
+
 ## TimeAttack
 To better demonstrate the benefit of QuadTrees on large data sets, a time attack
 demo is also provided to compare the run times between using a quad tree to
