@@ -6,7 +6,7 @@ namespace QuadTreeDemo
     {
         List<Object2D> points = new List<Object2D>();
         int treeWidth = 500;
-        PBQuadTree tree;
+        QuadTree tree;
         Stopwatch watch = new Stopwatch();
         List<QNodeLeaf> nodes = new List<QNodeLeaf>();
 
@@ -29,7 +29,7 @@ namespace QuadTreeDemo
         public Form1()
         {
             InitializeComponent();
-            tree = new PBQuadTree(new Point(-treeWidth, treeWidth), new Point(treeWidth, -treeWidth), new Point(0, 0));
+            tree = new QuadTree(new Point(-treeWidth, treeWidth), new Point(treeWidth, -treeWidth), new Point(0, 0));
             ta.Hide();
         }
 
@@ -47,7 +47,7 @@ namespace QuadTreeDemo
             nodes.Clear();
 
             Random random = new Random();
-            for (int i = 0; i < 10000; ++i)
+            for (int i = 0; i < 1000; ++i)
             {
                 Point p = new Point(random.Next(-treeWidth, treeWidth), random.Next(-treeWidth, treeWidth));
                 Object2D obj = new Object2D();
@@ -56,7 +56,7 @@ namespace QuadTreeDemo
                 points.Add(obj);
             }
 
-            tree = new PBQuadTree(new Point(-treeWidth, treeWidth), new Point(treeWidth, -treeWidth), new Point(0, 0));
+            tree = new QuadTree(new Point(-treeWidth, treeWidth), new Point(treeWidth, -treeWidth), new Point(0, 0));
 
             watch.Start();
             foreach (Object2D p in points)

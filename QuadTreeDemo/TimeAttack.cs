@@ -41,10 +41,12 @@ namespace QuadTreeDemo
             Point tl = new Point(-treeWidth, treeWidth);
             Point br = new Point(treeWidth, -treeWidth);
 
-            PBQuadTree tree = new PBQuadTree(tl, br, new Point(0, 0), (int)depthBox.Value);
+            PBQuadTree pbtree = new PBQuadTree(tl, br, new Point(0, 0), (int)depthBox.Value);
+            QuadTree tree = new QuadTree(tl, br, new Point(0, 0), (int)depthBox.Value);
 
             foreach(Object2D obj in points)
             {
+                pbtree.AddPoint(obj.position, obj);
                 tree.AddPoint(obj.position, obj);
             }
 
@@ -53,20 +55,44 @@ namespace QuadTreeDemo
             int runCount = (int)runCountBox.Value;
 
 
+            List<float> run_times_pbtree = new List<float>();
             List<float> run_times_tree = new List<float>();
             List<float> run_times_no_tree = new List<float>();
 
-            int treeHits = 0;
+            int pbtreeHits = 0;
             for(int i = 0; i < runCount; ++i)
             {
                 watch.Reset();
                 watch.Start();
-                List<QNodeLeaf> hits = tree.FindNodesInRadius(testObj.position, (float)searchRadiusBox.Value);
+                List<QNodeLeaf> hits = pbtree.FindNodesInRadius(testObj.position, (float)searchRadiusBox.Value);
                 foreach(QNodeLeaf hit in hits)
                 {
                     foreach(Object2D hitObj in hit.Items)
                     {
                         if(Point.Distance(testObj.position, hitObj.position) < (float)searchRadiusBox.Value)
+                        {
+                            ++pbtreeHits;
+                        }
+                    }
+                }
+                watch.Stop();
+                long microseconds = watch.ElapsedTicks / (Stopwatch.Frequency / (1000L * 1000L));
+                float ms = (float)microseconds / 1000.0f;
+                run_times_pbtree.Add(ms);
+            }
+
+
+            int treeHits = 0;
+            for (int i = 0; i < runCount; ++i)
+            {
+                watch.Reset();
+                watch.Start();
+                List<QNodeLeaf> hits = tree.FindNodesInRadius(testObj.position, (float)searchRadiusBox.Value);
+                foreach (QNodeLeaf hit in hits)
+                {
+                    foreach (Object2D hitObj in hit.Items)
+                    {
+                        if (Point.Distance(testObj.position, hitObj.position) < (float)searchRadiusBox.Value)
                         {
                             ++treeHits;
                         }
@@ -101,12 +127,21 @@ namespace QuadTreeDemo
                 run_times_no_tree.Add(ms);
             }
 
+            float avg_time_pbtree = 0;
+            foreach(float f in run_times_pbtree)
+            {
+                avg_time_pbtree += f;
+            }
+            avg_time_pbtree /= runCount;
+
             float avg_time_tree = 0;
-            foreach(float f in run_times_tree)
+            foreach (float f in run_times_tree)
             {
                 avg_time_tree += f;
             }
             avg_time_tree /= runCount;
+
+
 
             float avg_time_no_tree = 0;
             foreach(float f in run_times_no_tree){
@@ -114,6 +149,7 @@ namespace QuadTreeDemo
             }
             avg_time_no_tree /= runCount;
 
+            pbtreeTimeLabel.Text = avg_time_pbtree.ToString();
             treeTimeLabel.Text = avg_time_tree.ToString();
             noTreeTimeLabel.Text = avg_time_no_tree.ToString();
 

@@ -39,10 +39,12 @@
             this.timeAttackButton = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.treeTimeLabel = new System.Windows.Forms.Label();
+            this.pbtreeTimeLabel = new System.Windows.Forms.Label();
             this.noTreeTimeLabel = new System.Windows.Forms.Label();
             this.depthBox = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.treeTimeLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nodeBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.treeWidthBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchRadiusBox)).BeginInit();
@@ -187,34 +189,34 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 325);
+            this.label5.Location = new System.Drawing.Point(12, 313);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(321, 32);
+            this.label5.Size = new System.Drawing.Size(380, 32);
             this.label5.TabIndex = 9;
-            this.label5.Text = "Average time with tree (ms): ";
+            this.label5.Text = "Average time with fixed tree (ms): ";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 367);
+            this.label6.Location = new System.Drawing.Point(12, 377);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(357, 32);
             this.label6.TabIndex = 10;
             this.label6.Text = "Average time without tree (ms): ";
             // 
-            // treeTimeLabel
+            // pbtreeTimeLabel
             // 
-            this.treeTimeLabel.AutoSize = true;
-            this.treeTimeLabel.Location = new System.Drawing.Point(339, 325);
-            this.treeTimeLabel.Name = "treeTimeLabel";
-            this.treeTimeLabel.Size = new System.Drawing.Size(27, 32);
-            this.treeTimeLabel.TabIndex = 11;
-            this.treeTimeLabel.Text = "0";
+            this.pbtreeTimeLabel.AutoSize = true;
+            this.pbtreeTimeLabel.Location = new System.Drawing.Point(398, 313);
+            this.pbtreeTimeLabel.Name = "pbtreeTimeLabel";
+            this.pbtreeTimeLabel.Size = new System.Drawing.Size(27, 32);
+            this.pbtreeTimeLabel.TabIndex = 11;
+            this.pbtreeTimeLabel.Text = "0";
             // 
             // noTreeTimeLabel
             // 
             this.noTreeTimeLabel.AutoSize = true;
-            this.noTreeTimeLabel.Location = new System.Drawing.Point(375, 367);
+            this.noTreeTimeLabel.Location = new System.Drawing.Point(375, 377);
             this.noTreeTimeLabel.Name = "noTreeTimeLabel";
             this.noTreeTimeLabel.Size = new System.Drawing.Size(27, 32);
             this.noTreeTimeLabel.TabIndex = 12;
@@ -251,15 +253,35 @@
             this.label7.TabIndex = 14;
             this.label7.Text = "Tree depth";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(12, 345);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(418, 32);
+            this.label8.TabIndex = 15;
+            this.label8.Text = "Average time with dynamic tree (ms): ";
+            // 
+            // treeTimeLabel
+            // 
+            this.treeTimeLabel.AutoSize = true;
+            this.treeTimeLabel.Location = new System.Drawing.Point(436, 345);
+            this.treeTimeLabel.Name = "treeTimeLabel";
+            this.treeTimeLabel.Size = new System.Drawing.Size(27, 32);
+            this.treeTimeLabel.TabIndex = 16;
+            this.treeTimeLabel.Text = "0";
+            // 
             // TimeAttack
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(580, 441);
+            this.Controls.Add(this.treeTimeLabel);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.depthBox);
             this.Controls.Add(this.noTreeTimeLabel);
-            this.Controls.Add(this.treeTimeLabel);
+            this.Controls.Add(this.pbtreeTimeLabel);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.timeAttackButton);
@@ -296,9 +318,11 @@
         private Button timeAttackButton;
         private Label label5;
         private Label label6;
-        private Label treeTimeLabel;
+        private Label pbtreeTimeLabel;
         private Label noTreeTimeLabel;
         private NumericUpDown depthBox;
         private Label label7;
+        private Label label8;
+        private Label treeTimeLabel;
     }
 }

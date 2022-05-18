@@ -13,19 +13,19 @@ namespace QuadTreeDemo
     //This implementation works for small quantities of objects, but causes stack
     //overflows beyond roughly 200 objects (changes based on object distribution).
     
-    //Making this implementation depth aware and only allocating nodes down to a certain
-    //depth will greatly alleviate the strain on the stack and should prevent stack overflows.
-    //As is PBQuadTree is more stable, but with some changes this implementation can be made
-    //better.
+    //This implementation now has a depth limit which avoids a stack overflow by
+    //creating a list of items at the deepest node instead of having only one
+    //item per leaf
     internal class QuadTree
     {
         QNodeBase root;
 
-        public int maxDepth = 0;
+        public int maxDepth = 8;
 
-        public QuadTree(Point topLeft, Point bottomRight, Point center)
+        public QuadTree(Point topLeft, Point bottomRight, Point center, int max_depth = 8)
         {
             root = new QNodeSpine(topLeft, bottomRight, center);
+            maxDepth = max_depth;
         }
 
         //A basic function to subdivide a given quad, returns the quad in the quadrant specificed by quadrant
@@ -130,7 +130,7 @@ namespace QuadTreeDemo
         }
 
         //A recursive function to a point/object to a given node
-        private void AddPointToNode(ref QNodeBase node, Point p, Object2D data)
+        private void AddPointToNode(ref QNodeBase node, Point p, List<Object2D> data)
         {
 
             //Trace.WriteLine("Current tree depth: " + maxDepth.ToString());
@@ -165,29 +165,30 @@ namespace QuadTreeDemo
                 }
                 else
                 {
+                    QNodeLeaf leaf = (QNodeLeaf)spine.Children[quadrant];
+
                     //Otherwise get the leaf that is currently in the way,
                     //then create a new spine and call AddPointToNode twice,
                     //once for the old point (do this one first!) and then
                     //again for the new point
                     //also need to break the leaf into a spine and subdivide
-                    QNodeLeaf leaf = (QNodeLeaf)spine.Children[quadrant];
-
-                    Quad subQuad = SubdivideQuad(spine.ExtentTopLeft, spine.ExtentBottomRight, spine.Position, quadrant);
-
-
-                    //Calculate 
-                    int newDepth= spine.depth + 1;
-                    if(newDepth > maxDepth)
+                    if (spine.depth >= maxDepth)
                     {
-                        maxDepth = newDepth;
+                        //If we're at max depth, just add the data to the leaf
+                        leaf.Items.AddRange(data);
                     }
+                    else
+                    {
+                        //Otherwise we can break the leaf into a new spine
+                        Quad subQuad = SubdivideQuad(spine.ExtentTopLeft, spine.ExtentBottomRight, spine.Position, quadrant);
 
-                    QNodeSpine newSpine = new QNodeSpine(subQuad.topLeft, subQuad.bottomRight, subQuad.center);
-                    newSpine.depth = newDepth;
-                    spine.Children[quadrant] = newSpine;
+                        QNodeSpine newSpine = new QNodeSpine(subQuad.topLeft, subQuad.bottomRight, subQuad.center, spine.depth+1);
+                        
+                        spine.Children[quadrant] = newSpine;
 
-                    AddPointToNode(ref spine.Children[quadrant], leaf.Position, leaf.Items[0]);
-                    AddPointToNode(ref spine.Children[quadrant], p, data);
+                        AddPointToNode(ref spine.Children[quadrant], leaf.Position, leaf.Items);
+                        AddPointToNode(ref spine.Children[quadrant], p, data);
+                    }
                 }
             }
             //}
@@ -197,7 +198,9 @@ namespace QuadTreeDemo
         //Recursively calls AddPointToNode on the root node
         public void AddPoint(Point p, Object2D data)
         {
-            AddPointToNode(ref root, p, data);
+            List<Object2D> dataList = new List<Object2D>();
+            dataList.Add(data);
+            AddPointToNode(ref root, p, dataList);
         }
 
         //A function to draw the current tree to a bitmap

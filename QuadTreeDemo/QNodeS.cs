@@ -26,11 +26,12 @@ namespace QuadTreeDemo
 
         public int depth = 0;
 
-        public QNodeSpine(Point topLeft, Point bottomRight, Point center)
+        public QNodeSpine(Point topLeft, Point bottomRight, Point center, int node_depth = 0)
         {
             ExtentTopLeft = topLeft;
             ExtentBottomRight = bottomRight;
             Position = center;
+            depth = node_depth;
         }
 
         public QNodeSpine(Quad q)
